@@ -38,27 +38,24 @@ class ProcessXl extends Command
      */
     public function handle()
     {
-        // $filepath = $this->argument('filepath');
-        // try{
+        $filepath = $this->argument('filepath');
 
-        //     $validator = Validator::make($request->all(), [
-        //         'title' => 'required|unique:posts|max:255',
-        //         'body' => 'required',
-        //     ]);
-    
-        //     if ($validator->fails()) {
-        //         return redirect('post/create')->withErrors($validator);
-                    
+        try{
+
+            $uploadedFile = new \Symfony\Component\HttpFoundation\File\File($filepath);
+            $allowed =  array('xls','xlsx');
+            $ext = $uploadedFile->getExtension();
+            if(!in_array($ext, $allowed) ) {
+                throw new \Exception('Invalid file. Only .xls/.xlsx files are allowed');
+            }
+            $this->info('done');     
                             
-        //     $uploadedFile = new \Symfony\Component\HttpFoundation\File\File($filepath);
-        //     // $file = file($filepath);
-        //     $ext = $uploadedFile->getExtension();
-        //     $this->info($ext);
-        // }
-        // catch(\Exception $e)
-        // {
-        //     $this->info($e->getMessage());
-        // }
+            // $file = file($filepath);
+            // $this->info($ext);
+        }
+        catch(\Exception $e)
+        {
+            $this->info($e->getMessage());
+        }
     }
-
 }
