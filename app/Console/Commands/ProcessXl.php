@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use Validator;
+use App\Imports\UsersImport;
 use Illuminate\Console\Command;
+use Excel;
 
 class ProcessXl extends Command
 {
@@ -41,17 +43,21 @@ class ProcessXl extends Command
         $filepath = $this->argument('filepath');
 
         try{
-
             $uploadedFile = new \Symfony\Component\HttpFoundation\File\File($filepath);
             $allowed =  array('xls','xlsx');
             $ext = $uploadedFile->getExtension();
             if(!in_array($ext, $allowed) ) {
                 throw new \Exception('Invalid file. Only .xls/.xlsx files are allowed');
             }
-            $this->info('done');     
-                            
-            // $file = file($filepath);
-            // $this->info($ext);
+            $this->output->title('Starting import');
+            (new UsersImport)->withOutput($this->output)->import($uploadedFile->getRealPath());
+            $this->output->success('Import successful');
+            // Excel::import(new UsersImport, $uploadedFile->getRealPath());
+            // $data = Excel::toArray(new UsersImport,  $uploadedFile->getRealPath());
+            // $data = (new UsersImport)->toArray($uploadedFile->getRealPath(),null, \Maatwebsite\Excel\Excel::XLSX);
+           
+          
+       
         }
         catch(\Exception $e)
         {
