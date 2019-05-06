@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithProgressBar;
 
 
-class UsersImport implements ToModel, WithHeadingRow, WithProgressBar
+class UsersImport implements ToModel
 {
     use Importable;
     

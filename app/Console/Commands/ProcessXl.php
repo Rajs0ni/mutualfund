@@ -49,12 +49,15 @@ class ProcessXl extends Command
             if(!in_array($ext, $allowed) ) {
                 throw new \Exception('Invalid file. Only .xls/.xlsx files are allowed');
             }
-            $this->output->title('Starting import');
-            (new UsersImport)->withOutput($this->output)->import($uploadedFile->getRealPath());
-            $this->output->success('Import successful');
+            // $this->output->title('Starting import');
+            // (new UsersImport)->withOutput($this->output)->import($uploadedFile->getRealPath());
+            // $this->output->success('Import successful');
             // Excel::import(new UsersImport, $uploadedFile->getRealPath());
-            // $data = Excel::toArray(new UsersImport,  $uploadedFile->getRealPath());
-            // $data = (new UsersImport)->toArray($uploadedFile->getRealPath(),null, \Maatwebsite\Excel\Excel::XLSX);
+            $data = Excel::toArray(new UsersImport,  $uploadedFile->getRealPath());
+            foreach($data as $sheet) 
+            //     foreach($sheet as $row)
+                  print_r($sheet);  
+            // $data = (new UsersImport)->toArray($uploadedFile->getRealPath(),null, \Maatwebsite\Excel\Excel::XLS);
            
           
        
