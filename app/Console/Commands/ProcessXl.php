@@ -2,8 +2,7 @@
 
 namespace App\Console\Commands;
 
-use Validator;
-use App\Imports\UsersImport;
+use App\Imports\ExcelImport;
 use Illuminate\Console\Command;
 use Excel;
 
@@ -49,17 +48,24 @@ class ProcessXl extends Command
             if(!in_array($ext, $allowed) ) {
                 throw new \Exception('Invalid file. Only .xls/.xlsx files are allowed');
             }
-            // $this->output->title('Starting import');
-            // (new UsersImport)->withOutput($this->output)->import($uploadedFile->getRealPath());
-            // $this->output->success('Import successful');
-            // Excel::import(new UsersImport, $uploadedFile->getRealPath());
-            $data = Excel::toArray(new UsersImport,  $uploadedFile->getRealPath());
-            foreach($data as $sheet) 
-            //     foreach($sheet as $row)
-                  print_r($sheet);  
-            // $data = (new UsersImport)->toArray($uploadedFile->getRealPath(),null, \Maatwebsite\Excel\Excel::XLS);
+
+            $this->output->title('Starting import');
+            $Import = new ExcelImport();
+            $ts = Excel::import($Import, $uploadedFile->getRealPath());
+            // $data = [];
+            // // Return an import object for every sheet
+            // foreach ($Import->getSheetNames() as $index => $sheetName) {
+            //     $data[$index] = $sheetName;
+            // }
+            $value = [];
+       
+            foreach ($Import->getSheetData() as $index => $sheet) {
            
-          
+                    $value[$index] = $sheet;
+        
+            }
+            
+            $this->output->success('Import successful');
        
         }
         catch(\Exception $e)
