@@ -14,8 +14,8 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class ExcelImport implements ToArray, WithHeadingRow, WithEvents
-{
+class ExcelImport implements ToArray, WithEvents
+{ 
     use Importable;
     /**
      * @param Collection $collection
@@ -49,23 +49,15 @@ class ExcelImport implements ToArray, WithHeadingRow, WithEvents
         return $this->sheetData;
     }
    
-   
-    // public function model(array $row)
+    // public function headingRow(): int
     // {
-    //     return new Fund([
-    //         'Name of the Instrument'  => $row['Name of the Instrument'] ?? $row['client'] ?? $row['name'] ?? null,
-    //         'ISIN' => $row['ISIN'] ?? $row['client'] ?? $row['name'] ?? null,
-    //         'Industry' => $row['Industry'] ?? $row['Rating'] ?? $row['Industry/Rating'] ?? null,
-    //         'Quantity' => $row['Quantity'] ?? null,
-    //         'Market/Fair' => $row['Market/Fair Value (Rs. in Lakhs)'] ?? null,
-    //         '% to Net Assets' => $row['% to Net Assets'] ?? null
-    //     ]);
+    //     return 4;
     // }
 
     // public function sheets(): array
     // {
     //     return [
-    //         new SheetImport()
+    //         0 => new SheetImport()
     //     ];
     // }
   
