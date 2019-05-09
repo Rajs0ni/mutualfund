@@ -6,9 +6,16 @@ use App\Imports\ExcelImport;
 use Illuminate\Console\Command;
 use Excel;
 use App\Fund;
+use Validator;
 
 class ProcessXl extends Command
 {
+    public $NAMEOFINSTRUMENT;
+    public $ISIN;
+    public $INDUSTRY;
+    public $QUANTITIY;
+    public $MARKETVALUE;
+    public $NAV;
     /**
      * The name and signature of the console command.
      *
@@ -47,7 +54,7 @@ class ProcessXl extends Command
 
         try{
             $uploadedFile = new \Symfony\Component\HttpFoundation\File\File($filepath);
-            $allowed =  array('xlsx');
+            $allowed =  array('xls','xlsx');
             $ext = $uploadedFile->getExtension();
             if(!in_array($ext, $allowed) ) {
                 throw new \Exception('Invalid file. Only .xls/.xlsx files are allowed');
@@ -56,88 +63,156 @@ class ProcessXl extends Command
             $this->output->title('Starting import');
             $Import = new ExcelImport();
             
-            $ts = Excel::import($Import, $uploadedFile->getRealPath());
+            Excel::import($Import, $uploadedFile->getRealPath());
 
-            // Return an import object for every sheet
-            // $data = [];
-            // foreach ($Import->getSheetNames() as $index => $sheetName) {
-            //     $data[$index] = $sheetName;
-            // }
-            // dd($data);
-
-            $sheetWithData = [];
+            $sheets = [];
             foreach ($Import->getSheetData() as $index => $value) {
-                $sheetWithData[$index] = $value;
+                $sheets[$index] = $value;
             }
-        //  dd($sheetWithData["AXIS100"]);
-        foreach ($sheetWithData["AXISGETF"] as $key => $row) {
-         
-            if($this->findHeadingRow($row))
-            {
-                $this->info("Process ahead ".$key);
-                    
+            foreach ($sheets as $key => $sheet) {
+                foreach ($sheet as $key => $row) {
+                    if($this->findHeadingRow($row))
+                    {
+                        $this->processRecord($sheet,$key);
+                        break;
+                    }
+                }
             }
-        }
-
-
-
-            // $parsedData = [];
-            // foreach ( $sheetWithData as $key => $sheetData) {
-            //     if($key == 'Index')
-            //         continue;
-            //     else
-            //     {
-            //         foreach ($sheetData as $key => $value) {
-            //             if($value[""])
-            //             {
-            //                 $parsedData[] = $value;
-            //             }
-            //         }
-            //     }              
-            // }
-            
-            // foreach ($parsedData as $key => $record) {
-            //     try{
-            //        Fund::create([
-            //            'Name of the Instrument' => $record["name_of_the_instrument"]  ?? null,
-            //            'ISIN' => $record["isin"] ?? null,
-            //            'Industry' => $record["rating"] ?? $record["industry"] ?? $record["industry_rating"] ?? null ,
-            //            'Quantity' => $record["quantity"] ?? null,
-            //            'Market/Fair' =>  $record["marketfair_value_rs_in_lakhs"] ?? null,
-            //            '% to Net Assets' => $record["to_net_assets"] ?? null
-            //        ]);
-            //     }catch(\Exception $e){
-            //         $this->info($e->getMessage());
-            //     }
-            // }
-
-            $this->output->success('Import successful');
-                
+            $this->output->success('Import successful');          
         }
         catch(\Exception $e)
         {
             $this->info($e->getMessage());
         }
     }
-    
+
     public function findHeadingRow($row)
     {
-            $result = 0;
-            $flag =0;
-            foreach ($row as $key => $value) { 
-              if($value == "Name of the Instrument" || $value == "ISIN" ||  $value == "Quantity" )
-                {
-                    $flag = 1;
-                   
-                }
-                else 
-                {
-                   $flag = 0;
-                   
-                }
-                $result = $result || $flag;
-            }
-            return  $result;
-     
+        $result = 0;
+        $flag =0;
+        $INSTRUMENT = "Name of the Instrument";
+        $ISIN = "ISIN";
+        $QUANTITIY = "Quantity";
+
+        foreach ($row as $key => $value) { 
+            $flag = strtolower($value) == strtolower($INSTRUMENT) ||
+                    strtolower($value) == strtolower($ISIN) ||  
+                    strtolower($value) == strtolower($QUANTITIY) ? 1 : 0;
+            $result = $result || $flag;
+        }
+        return $result;
     }
+
+    public function processRecord($sheet, $headingRowIndex){
+        
+        $headerRow = $sheet[$headingRowIndex];
+        $orderedColumnHeader = $this->parseHeadingRow($headerRow);
+        // $this->info("in process");
+        // dd($orderedColumnHeader);
+        $mappedRecord = [];
+        for($index=($headingRowIndex+1); $index < count($sheet); $index++) {
+            $mappedRecord[] = $this->mapRecord($sheet[$index]);
+            // foreach ($headerRow as $key => $value) {
+            //     $mappedRecord[$value] = $sheet[$index][$key];
+            // }
+            if($this->validateRecord($mappedRecord))
+            {
+                // try{
+                //     Fund::create([
+                //         'Name of the Instrument' => $mappedRecord["Name of the Instrument"], 
+                //         'ISIN' => $mappedRecord["ISIN"],
+                //         'Industry' => $mappedRecord["Rating"] ?? $mappedRecord["Industry"] ?? $mappedRecord["Industry / Rating"],
+                //         'Quantity' => $mappedRecord["Quantity"] ,
+                //         'Market/Fair' =>  $mappedRecord["Market/Fair Value\n (Rs. in Lakhs)"],
+                //         '% to Net Assets' => $mappedRecord["% to Net\n Assets"]
+                //     ]);
+                //  }catch(\Exception $e){
+                //      $this->info($e->getMessage());
+                //  }
+            }
+        }
+    }
+
+    public function mapRecord(array $record){
+        $mappedRecord = [];
+        $mappedRecord[$this->NAMEOFINSTRUMENT] = $sheet[$index][$key];
+    }
+    
+    public function parseHeadingRow(array $headerRow)
+    {
+        $nameofinst =["instrument","name"];
+        $isin = ["isin"];
+        $industry = ["industry", "rating"];
+        $quantity = ["quantity"];
+        $marketFair = ["market","fair","value"];
+        $nav = ["net","assets","nav"];
+        
+        $orderedColumnHeader = [];
+        foreach ($headerRow as $key => $value) {
+            foreach ($nameofinst as $word) {
+                if (strpos(strtolower($value), $word) !== FALSE) { 
+                    $this->NAMEOFINSTRUMENT = $value;
+                    $orderedColumnHeader[$key] = $value;
+                    break;
+                }
+            }
+            foreach ($isin as $word) {
+                if (strpos(strtolower($value), $word) !== FALSE) { 
+                    $this->ISIN = $value;
+                    $orderedColumnHeader[$key] = $value;
+                    break;
+                }
+            }
+            foreach ($industry as $word) {
+                if (strpos(strtolower($value), $word) !== FALSE) { 
+                    $this->INDUSTRY = $value; 
+                    $orderedColumnHeader[$key] = $value;
+                    break;
+                }
+            }
+            foreach ($quantity as $word) {
+                if (strpos(strtolower($value), $word) !== FALSE) { 
+                    $this->QUANTITIY = $value; 
+                    $orderedColumnHeader[$key] = $value;
+                    break;
+                }
+            }
+            foreach ($marketFair as $word) {
+                if (strpos(strtolower($value), $word) !== FALSE) { 
+                    $this->MARKETVALUE = $value; 
+                    $orderedColumnHeader[$key] = $value;
+                    break;
+                }
+            }
+            foreach ($nav as $word) {
+                if (strpos(strtolower($value), $word) !== FALSE) { 
+                    $this->NAV = $value; 
+                    $orderedColumnHeader[$key] = $value;
+                    break;
+                }
+            }
+        }
+        return $orderedColumnHeader;
+    }
+
+    public function validateRecord(array $mappedRecord){
+        
+        $validator = Validator::make($mappedRecord, [
+           $this->n => 'string',
+           $this->is => 'required|alpha_num',
+           $this->q => 'required|numeric',
+           $this->m => 'numeric'
+        ]);
+
+        if ($validator->passes()) {
+           return true;
+        }
+    }
+
+    public function containsSpecialLetter(array $record){
+        $letter = "$";
+        if(stripos($record["% to Net\n Assets"],$letter))
+        $this->info(stripos($record["% to Net\n Assets"],$letter));
+    }
+   
 }

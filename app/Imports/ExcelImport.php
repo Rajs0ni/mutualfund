@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
+
 class ExcelImport implements ToArray, WithEvents
 { 
     use Importable;
@@ -27,6 +28,7 @@ class ExcelImport implements ToArray, WithEvents
         $this->sheetNames = [];
         $this->sheetData = [];
     }
+
     public function array(array $array)
     {
         $this->sheetData[$this->sheetNames[count($this->sheetNames)-1]] = $array;
@@ -49,16 +51,4 @@ class ExcelImport implements ToArray, WithEvents
         return $this->sheetData;
     }
    
-    // public function headingRow(): int
-    // {
-    //     return 4;
-    // }
-
-    // public function sheets(): array
-    // {
-    //     return [
-    //         0 => new SheetImport()
-    //     ];
-    // }
-  
 }

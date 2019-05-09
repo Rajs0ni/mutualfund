@@ -20,7 +20,7 @@ class CreateFundsTable extends Migration
             $table->string('Industry')->nullable();
             $table->decimal('Quantity',12,2)->nullable()->default(0);
             $table->decimal('Market/Fair', 10,2)->nullable()->default(0);
-            $table->float('% to Net Assets', 8,2)->nullable()->default(0);
+            $table->string('% to Net Assets')->nullable();
             $table->timestamps();
         });
     }
