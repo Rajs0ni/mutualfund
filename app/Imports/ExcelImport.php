@@ -3,7 +3,6 @@
 namespace App\Imports;
 
 use Illuminate\Support\Collection;
-use App\Fund;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\ToArray;
