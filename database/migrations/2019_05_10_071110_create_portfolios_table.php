@@ -15,8 +15,10 @@ class CreatePortfoliosTable extends Migration
     {
         Schema::create('portfolios', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->integer('mf_id')->nullable();
+            $table->string('month_year')->nullable();
             $table->integer('stock_id')->unsigned();
-            $table->decimal('qauantity',12,2)->nullable()->default(0);
+            $table->decimal('quantity',12,2)->nullable()->default(0);
             $table->timestamps();
             $table->foreign('stock_id')
             ->references('id')

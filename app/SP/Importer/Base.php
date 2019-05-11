@@ -3,7 +3,9 @@
 namespace App\SP\Importer;
 
 use Validator;
-use App\SP\Models\Fund;
+use App\SP\Models\Portfolio;
+use App\SP\Models\MutualFund;
+use App\SP\Models\Stock;
 
 class Base {
 
@@ -14,9 +16,15 @@ class Base {
     public $MARKETVALUE;
     public $NAV;
     public $OrderedColumnHeader;
+    public $family;
+    public $sheetSortname;
+    public $sheetFullname;
 
-    public function processEachSheet($sheet) {
+    public function processEachSheet($sheet, $sheetSortname, $sheetFullname, $family) {
 
+        $this->family = $family;
+        $this->sheetSortname = $sheetSortname;
+        $this->sheetFullname = $sheetFullname;
         $header = $this->getHeaderRow($sheet);
         if($header)
         {
@@ -27,26 +35,26 @@ class Base {
                     $this->save($mappedRecord);
             }
         }
-        
     }
 
     public function getHeaderRow($sheet)
     {
+        $headerKeywords = ["Name of the Instrument","ISIN","Quantity"];
+        
         $nameofinst =["instrument","name"];
         $isin = ["isin"];
         $industry = ["industry", "rating"];
         $quantity = ["quantity"];
         $marketFair = ["market","fair","value"];
         $nav = ["net","assets","nav"];
-        $headerIndex;
 
         try 
         {
-            foreach ($sheet as $index => $row) {
-                if($this->isHeaderRow($row))
+            foreach ($sheet as $rowIndex => $row) {
+                if($this->isHeaderRow($row, $headerKeywords))
                 {
+                   
                     foreach ($row as $key => $value) {
-                       
                         foreach ($nameofinst as $word) {
                             if (strpos(strtolower($value), $word) !== FALSE) { 
                                 $this->NAMEOFINSTRUMENT = $value;
@@ -90,7 +98,7 @@ class Base {
                             }
                         }
                     }
-                    return $index;
+                    return $rowIndex;
                 }
             }
         }
@@ -100,19 +108,16 @@ class Base {
         
     }  
     
-    public function isHeaderRow($row)
+    public function isHeaderRow($row, $headerKeywords)
     {
         $result = 0;
         $flag =0;
-        $instrument = "Name of the Instrument";
-        $isin = "ISIN";
-        $quantity = "Quantity";
       
         foreach ($row as $key => $value) { 
-            $flag = strtolower($value) == strtolower($instrument) ||
-                    strtolower($value) == strtolower($isin) ||  
-                    strtolower($value) == strtolower($quantity) ? 1 : 0;
-            $result = $result || $flag;
+            foreach ($headerKeywords as $keyword) {
+                $flag = strtolower($value) == strtolower($keyword) ? 1 : 0;
+                $result = $result || $flag;
+            }
         }
         return $result;
     }
@@ -134,14 +139,27 @@ class Base {
 
     public function save($record){
         try{
-            Fund::create([
-                'Name of the Instrument' => $record[$this->NAMEOFINSTRUMENT], 
-                'ISIN' => $record[$this->ISIN],
-                'Industry' => $record[$this->INDUSTRY],
-                'Quantity' => $record[$this->QUANTITY] ,
-                'Market/Fair' =>  $record[$this->MARKETVALUE],
-                '% to Net Assets' => $record[$this->NAV]
+
+            $mutualFund = MutualFund::create([
+                'legal_id' => $record[$this->ISIN],
+                'nickname' => $this->sheetSortname,
+                'name' => $this->sheetFullname,
+                'family' => $this->family,
+
             ]);
+
+            $stock = Stock::create([
+                'stock_name' => $record[$this->NAMEOFINSTRUMENT],
+                'isin' => $record[$this->ISIN]
+            ]); 
+
+            if($stock && $mutualFund)
+                Portfolio::create([
+                    'stock_id' => $stock->id,
+                    'mf_id' => $mutualFund->id,
+                    'month_year' => "May,2019",
+                    'quantity' => $record[$this->QUANTITY]
+                ]);
         }
         catch(\Exception $e){
             echo($e->getMessage());

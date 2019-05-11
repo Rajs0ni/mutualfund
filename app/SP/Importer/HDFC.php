@@ -4,11 +4,11 @@ namespace App\SP\Importer;
 
 use App\SP\Importer\Base;
 
-class Axis extends Base {
+class HDFC extends Base{
 
-    protected $indexFileName = "Index"; 
-    protected $sheetnameRowIndex = 1;
-    protected $sheetnameColumnIndex = 1;
+    protected $indexFileName = "Hyperlinks"; 
+    protected $sheetnameRowIndex = 0;
+    protected $sheetnameColumnIndex = 0;
 
     public function getIndexFileName()
     {

@@ -5,7 +5,7 @@ namespace App\Imports;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-class SheetImport implements ToCollection
+class FirstSheetImport implements ToCollection
 {
     /**
     * @param Collection $collection
