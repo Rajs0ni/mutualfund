@@ -7,21 +7,37 @@ use App\SP\Importer\Base;
 class Axis extends Base {
 
     protected $indexFileName = "Index"; 
-    protected $sheetnameRowIndex = [0,1];
-    protected $sheetnameColumnIndex = [1,1];
+    protected $rowIndex = 1;
+    protected $columnIndex = 2;
 
     public function getIndexFileName()
     {
         return $this->indexFileName;
     }
 
-    public  function getSheetnameRowIndex()
+    public  function getRowIndex()
     {
-        return $this->sheetnameRowIndex;
+        return $this->rowIndex;
     }
 
-    public  function getSheetnameColumnIndex()
+    public  function getColumnIndex()
     {
-        return $this->sheetnameColumnIndex;
+        return $this->columnIndex;
+    }
+
+    public function processIndexFile($sheet){
+        $temp=[];
+        for ($offset=$instance->getRowIndex(); $offset < count($sheets[$instance->getIndexFileName()]); $offset++) { 
+
+                    $temp[$offset] = $sheets[$instance->getIndexFileName()][$offset][$instance->getColumnIndex()];
+                    
+        }
+        $t=[];
+        foreach ($excelImport->getSheetNames() as $index => $sheetSortname) {
+            if($instance->getIndexFileName() !== $sheetSortname)
+            {
+                $t[$sheetSortname] = $temp[$index];
+            }
+        }
     }
 }

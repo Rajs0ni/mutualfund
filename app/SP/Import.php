@@ -35,7 +35,6 @@ class Import {
         $instance = new $family;
         $excelImport = new ExcelImport();
         Excel::import($excelImport, $uploadedFile->getRealPath());
-        // dd($excelImport->getSheetNames());
 
         $sheets = [];
         foreach ($excelImport->getSheetData() as $index => $value) {
@@ -49,7 +48,6 @@ class Import {
                     $sheetFullname = $sheet[$rowIndex][$columnIndex];
                     if($sheetFullname) break;
                 }
-                dd($sheetFullname); // $sheetFullname = $sheet[0][1];
                 $instance->processEachSheet($sheet, $sheetSortname, $sheetFullname, $this->family, $this->month_year);
             }
                 
