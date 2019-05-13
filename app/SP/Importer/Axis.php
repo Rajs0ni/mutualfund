@@ -7,8 +7,8 @@ use App\SP\Importer\Base;
 class Axis extends Base {
 
     protected $indexFileName = "Index"; 
-    protected $sheetnameRowIndex = 1;
-    protected $sheetnameColumnIndex = 1;
+    protected $sheetnameRowIndex = [0,1];
+    protected $sheetnameColumnIndex = [1,1];
 
     public function getIndexFileName()
     {

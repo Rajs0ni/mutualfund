@@ -12,5 +12,17 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    
+   try {
+    \Artisan::call("test:xl", [
+        'filepath' => "/home/raj/Downloads/Axis MF - Monthly Portfolios - March 2019.xls",
+        'family' =>"Axis",
+        'month_year' => "March,2019"
+    ]);
+    
+   }catch(\Exception $e)
+   {
+     return ($e->getMessage());
+   }
+    // return view('welcome');
 });

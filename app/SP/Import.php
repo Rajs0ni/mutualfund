@@ -8,11 +8,13 @@ class Import {
     
     protected $filePath;
     protected $family;
+    protected $month_year;
 
-    public function __construct($filepath, $family)
+    public function __construct($filepath, $family, $month_year)
     {
         $this->filePath = $filepath;
         $this->family = $family;
+        $this->month_year = $month_year;
     }
 
 
@@ -33,6 +35,7 @@ class Import {
         $instance = new $family;
         $excelImport = new ExcelImport();
         Excel::import($excelImport, $uploadedFile->getRealPath());
+        // dd($excelImport->getSheetNames());
 
         $sheets = [];
         foreach ($excelImport->getSheetData() as $index => $value) {
@@ -42,8 +45,12 @@ class Import {
         foreach ($sheets as $sheetSortname => $sheet) {
             if($instance->getIndexFileName() !== $sheetSortname )
             {   
-                $sheetFullname = $sheet[$instance->getSheetnameRowIndex()][$instance->getSheetnameColumnIndex()];
-                $instance->processEachSheet($sheet, $sheetSortname, $sheetFullname, $this->family);
+                foreach (array_combine($instance->getSheetnameRowIndex(), $instance->getSheetnameColumnIndex()) as $rowIndex => $columnIndex) {
+                    $sheetFullname = $sheet[$rowIndex][$columnIndex];
+                    if($sheetFullname) break;
+                }
+                dd($sheetFullname); // $sheetFullname = $sheet[0][1];
+                $instance->processEachSheet($sheet, $sheetSortname, $sheetFullname, $this->family, $this->month_year);
             }
                 
         }
