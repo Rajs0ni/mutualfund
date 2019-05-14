@@ -6,22 +6,33 @@ use App\SP\Importer\Base;
 
 class HDFC extends Base{
 
-    protected $indexFileName = "Hyperlinks"; 
-    protected $sheetnameRowIndex = 0;
-    protected $sheetnameColumnIndex = 0;
+    protected $indexFileName = ["Hyperlinks","Sheet1"]; 
+    protected $rowIndex = 0;
+    protected $columnIndex = 0;
 
     public function getIndexFileName()
     {
         return $this->indexFileName;
     }
 
-    public  function getSheetnameRowIndex()
+    public  function getRowIndex()
     {
-        return $this->sheetnameRowIndex;
+        return $this->rowIndex;
     }
 
-    public  function getSheetnameColumnIndex()
+    public  function getColumnIndex()
     {
-        return $this->sheetnameColumnIndex;
+        return $this->columnIndex;
     }
+
+    public function processIndexSheet($sheets,$sheetnames)
+    {
+        $indexSheet = [];
+        foreach ($sheets as $shortname => $sheet) {
+            if(!in_array($shortname, $this->getIndexFileName()))
+                $indexSheet[$shortname] = $sheet[$this->getRowIndex()][$this->getColumnIndex()];   
+        }
+        return $indexSheet;
+    }
+
 }

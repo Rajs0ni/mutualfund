@@ -9,6 +9,7 @@ use App\SP\Models\Stock;
 
 class Base {
 
+    public $indexSheet;
     public $NAMEOFINSTRUMENT;
     public $ISIN;
     public $INDUSTRY;
@@ -18,15 +19,17 @@ class Base {
     public $OrderedColumnHeader;
     public $family;
     public $sheetSortname;
-    public $sheetFullname;
     public $month_year;
     public $mf_ID;
 
-    public function processEachSheet($sheet, $sheetSortname, $sheetFullname, $family, $month_year) {
+    public function setIndexSheet($indexSheet){
+        $this->indexSheet = $indexSheet;
+    }
+    
+    public function processEachSheet($sheet, $sheetSortname, $family, $month_year) {
 
         $this->family = $family;
         $this->sheetSortname = $sheetSortname;
-        $this->sheetFullname = $sheetFullname;
         $this->month_year = $month_year;
         $this->OrderedColumnHeader = [];
         $this->mf_ID = $this->saveFund();
@@ -55,56 +58,61 @@ class Base {
         $nav = ["net","assets","nav"];
 
         try 
-        {
+        {  
             foreach ($sheet as $rowIndex => $row) {
                 if($this->isHeaderRow($row, $headerKeywords))
                 {
                    
-                    foreach ($row as $key => $value) {
+                    for ($offset=0; $offset < count($row) ; $offset++) { 
                         foreach ($nameofinst as $word) {
-                            if (strpos(strtolower($value), $word) !== FALSE) { 
-                                $this->NAMEOFINSTRUMENT = $value;
-                                $this->OrderedColumnHeader[$key] = $value;
+                            if (strpos(strtolower($row[$offset]), $word) !== FALSE) { 
+                                $this->NAMEOFINSTRUMENT = $row[$offset];
+                                $this->OrderedColumnHeader[$offset] = $row[$offset];
+                                $offset++;
                                 break;
                             }
                         }
                         foreach ($isin as $word) {
-                            if (strpos(strtolower($value), $word) !== FALSE) { 
-                                $this->ISIN = $value;
-                                $this->OrderedColumnHeader[$key] = $value;
+                            if (strpos(strtolower($row[$offset]), $word) !== FALSE) { 
+                                $this->ISIN = $row[$offset];
+                                $this->OrderedColumnHeader[$offset] = $row[$offset];
+                                $offset++;
                                 break;
                             }
                         }
                         foreach ($industry as $word) {
-                            if (strpos(strtolower($value), $word) !== FALSE) { 
-                                $this->INDUSTRY = $value; 
-                                $this->OrderedColumnHeader[$key] = $value;
+                            if (strpos(strtolower($row[$offset]), $word) !== FALSE) { 
+                                $this->INDUSTRY = $row[$offset]; 
+                                $this->OrderedColumnHeader[$offset] = $row[$offset];
+                                $offset++;
                                 break;
                             }
                         }
                         foreach ($quantity as $word) {
-                            if (strpos(strtolower($value), $word) !== FALSE) { 
-                                $this->QUANTITY = $value; 
-                                $this->OrderedColumnHeader[$key] = $value;
+                            if (strpos(strtolower($row[$offset]), $word) !== FALSE) { 
+                                $this->QUANTITY = $row[$offset]; 
+                                $this->OrderedColumnHeader[$offset] = $row[$offset];
+                                $offset++;
                                 break;
                             }
                         }
                         foreach ($marketFair as $word) {
-                            if (strpos(strtolower($value), $word) !== FALSE) { 
-                                $this->MARKETVALUE = $value; 
-                                $this->OrderedColumnHeader[$key] = $value;
+                            if (strpos(strtolower($row[$offset]), $word) !== FALSE) { 
+                                $this->MARKETVALUE = $row[$offset]; 
+                                $this->OrderedColumnHeader[$offset] = $row[$offset];
+                                $offset++;
                                 break;
                             }
                         }
                         foreach ($nav as $word) {
-                            if (strpos(strtolower($value), $word) !== FALSE) { 
-                                $this->NAV = $value; 
-                                $this->OrderedColumnHeader[$key] = $value;
+                            if (strpos(strtolower($row[$offset]), $word) !== FALSE) { 
+                                $this->NAV = $row[$offset]; 
+                                $this->OrderedColumnHeader[$offset] = $row[$offset];
+                                $offset++;
                                 break;
                             }
                         }
                     }
-                    // dd($this->OrderedColumnHeader);
                     return $rowIndex;
                 }
             }
@@ -147,13 +155,17 @@ class Base {
     public function saveFund() {
         try {
 
-            $mutualFund = MutualFund::create([
-                'legal_id' => NULL,
-                'nickname' => $this->sheetSortname,
-                'name' => $this->sheetFullname,
-                'family' => $this->family,
-
-            ]);
+            $mutualFund = MutualFund::where('nickname', $this->sheetSortname)->first();
+            if(!$mutualFund)
+            {
+                $mutualFund = MutualFund::create([
+                    'legal_id' => NULL,
+                    'nickname' => $this->sheetSortname,
+                    'name' => $this->indexSheet[$this->sheetSortname],
+                    'family' => $this->family,
+    
+                ]);
+            }
             return $mutualFund->id;
         }
         catch(\Exception $e){
@@ -163,10 +175,15 @@ class Base {
 
     public function save($record){
         try{
-            $stock = Stock::create([
-                'stock_name' => $record[$this->NAMEOFINSTRUMENT],
-                'isin' => $record[$this->ISIN]
-            ]); 
+
+            $stock = Stock::where('isin', $record[$this->ISIN])->first();
+            if(!$stock)
+            {
+                $stock = Stock::create([
+                    'stock_name' => $record[$this->NAMEOFINSTRUMENT],
+                    'isin' => $record[$this->ISIN]
+                ]); 
+            }
 
             if($stock && $this->mf_ID)
                 Portfolio::create([

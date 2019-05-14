@@ -15,9 +15,9 @@ Route::get('/', function () {
     
    try {
     \Artisan::call("test:xl", [
-        'filepath' => "/home/raj/Downloads/Axis MF - Monthly Portfolios - March 2019.xls",
+        'filepath' => "/home/raj/Downloads/Axis/Feb 2018 1973.xls",
         'family' =>"Axis",
-        'month_year' => "March,2019"
+        'month_year' => "Feb,2018"
     ]);
     
    }catch(\Exception $e)
