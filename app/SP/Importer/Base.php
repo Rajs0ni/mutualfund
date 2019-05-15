@@ -47,22 +47,20 @@ class Base {
     }
 
     public function getHeaderRow($sheet)
-    {
-        $headerKeywords = ["Name of the Instrument","ISIN","Quantity"];
-        
+    {   
         $nameofinst =["instrument","name"];
         $isin = ["isin"];
         $industry = ["industry", "rating"];
         $quantity = ["quantity"];
         $marketFair = ["market","fair","value"];
-        $nav = ["net","assets","nav"];
+        $nav = ["net","assets","nav","aum"];
 
         try 
         {  
             foreach ($sheet as $rowIndex => $row) {
-                if($this->isHeaderRow($row, $headerKeywords))
+                if($this->isHeaderRow($row))
                 {
-                   
+                 
                     for ($offset=0; $offset < count($row) ; $offset++) { 
                         foreach ($nameofinst as $word) {
                             if (strpos(strtolower($row[$offset]), $word) !== FALSE) { 
@@ -123,11 +121,12 @@ class Base {
         
     }  
     
-    public function isHeaderRow($row, $headerKeywords)
+    public function isHeaderRow($row)
     {
         $result = 0;
         $flag = 0;
-      
+        $headerKeywords = ["Name of the Instrument","ISIN","Quantity"];
+
         foreach ($row as $key => $value) { 
             foreach ($headerKeywords as $keyword) {
                 $flag = strtolower($value) == strtolower($keyword) ? 1 : 0;
@@ -138,13 +137,10 @@ class Base {
     }
 
     public function mapEachRecord(array $record){
-        try {
-            
+        try
+        {
             foreach ($this->OrderedColumnHeader as $key => $value)
-            {
                 $mappedRecord[$value] = $record[$key];
-
-            }
             return $mappedRecord;
         }   
         catch(\Exception $e){
@@ -153,8 +149,8 @@ class Base {
     }
 
     public function saveFund() {
-        try {
-
+        try 
+        {
             $mutualFund = MutualFund::where('nickname', $this->sheetSortname)->first();
             if(!$mutualFund)
             {
@@ -174,8 +170,8 @@ class Base {
     }
 
     public function save($record){
-        try{
-
+        try
+        {
             $stock = Stock::where('isin', $record[$this->ISIN])->first();
             if(!$stock)
             {
@@ -200,10 +196,11 @@ class Base {
 
     public function validateRecord($mappedRecord){
         if($mappedRecord){
-            try {
+            try 
+            {
                 $validator = Validator::make($mappedRecord, [
                     $this->NAMEOFINSTRUMENT => 'string',
-                    $this->ISIN => 'required|alpha_num',
+                    $this->ISIN => 'required|alpha_num|max:12|min:12',
                     $this->QUANTITY => 'required|numeric',
                     $this->MARKETVALUE => 'numeric',   
                  ]);

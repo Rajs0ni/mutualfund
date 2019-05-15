@@ -14,7 +14,7 @@
 Route::get('/', function () {
     
    try {
-    \Artisan::call("test:xl", [
+    \Artisan::call("process:xl", [
         'filepath' => "/home/raj/Downloads/Axis/Feb 2018 1973.xls",
         'family' =>"Axis",
         'month_year' => "Feb,2018"

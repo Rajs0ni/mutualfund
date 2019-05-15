@@ -44,7 +44,7 @@ class Import {
             foreach ($excelImport->getSheetData() as $index => $value) {
                 $sheets[$index] = $value;
             }
-
+            
             $indexSheet = $instance->processIndexSheet($sheets,$excelImport->getSheetNames());
             $instance->setIndexSheet($indexSheet);
 
