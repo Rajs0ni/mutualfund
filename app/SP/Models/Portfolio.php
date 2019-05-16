@@ -12,4 +12,10 @@ class Portfolio extends Model
        'stock_id',
        'quantity'
    ];
+
+   public function stocks($monthYear)
+   {
+       return $monthYear;
+   }
+
 }

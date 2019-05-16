@@ -16,7 +16,7 @@ class CreateMutualFundsTable extends Migration
         Schema::create('mutual_funds', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('legal_id')->nullable();
-            $table->string('nickname')->nullable();
+            $table->string('nickname')->unique();
             $table->string('name')->nullable();
             $table->string('family')->nullable();
             $table->timestamps();

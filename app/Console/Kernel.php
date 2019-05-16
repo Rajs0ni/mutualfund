@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         commands\ProcessXl::class,
-        commands\Test::class
+        commands\Test::class,
+        commands\analyzeXl::class,
     ];
 
     /**

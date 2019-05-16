@@ -16,7 +16,7 @@ class CreateStocksTable extends Migration
         Schema::create('stocks', function (Blueprint $table) {
             $table->increments('id');
             $table->string('stock_name')->nullable();
-            $table->string('isin')->nullable();
+            $table->string('isin')->unique();
             $table->timestamps();
         });
     }
