@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use App\SP\Import;
 
 class ProcessXl extends Command
-{
+{ 
     protected $signature = 'process:xl {filepath} {family} {month_year}';
     protected $description = 'To process excel sheet';
 

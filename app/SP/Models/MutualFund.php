@@ -14,8 +14,8 @@ class MutualFund extends Model
     ];
 
 
-    public function portfolios()
-    {
-        return $this->hasMany('App\SP\Models\Portfolio','mf_id');
-    }
+    // public function portfolios()
+    // {
+    //     return $this->hasMany('App\SP\Models\Portfolio','mf_id');
+    // }
 }

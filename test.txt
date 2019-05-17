@@ -1,0 +1,4 @@
+SELECT stock_id, count(mf_id) as mf_count, count(DISTINCT(mf_house)) as mfh_count, SUM(quantity) as q_sum 
+FROM `portfolios`
+WHERE month_year = 'Jan,2018'
+group By stock_id

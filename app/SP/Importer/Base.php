@@ -186,7 +186,8 @@ class Base {
                     'stock_id' => $stock->id,
                     'mf_id' => $this->mf_ID,
                     'month_year' => $this->month_year,
-                    'quantity' => $record[$this->QUANTITY]
+                    'quantity' => $record[$this->QUANTITY],
+                    'mf_house' => $this->family
                 ]);
         }
         catch(\Exception $e){

@@ -13,16 +13,17 @@
 
 Route::get('/', function () {
     
-   try {
-    \Artisan::call("process:xl", [
-        'filepath' => "/home/raj/Downloads/Axis/Feb 2018 1973.xls",
-        'family' =>"Axis",
-        'month_year' => "Feb,2018"
-    ]);
+  //  try {
+  //   \Artisan::call("process:xl", [
+  //       'filepath' => "/home/raj/Downloads/Axis/Feb 2018 1973.xls",
+  //       'family' =>"Axis",
+  //       'month_year' => "Feb,2018"
+  //   ]);
     
-   }catch(\Exception $e)
-   {
-     return ($e->getMessage());
-   }
-    // return view('welcome');
+  //  }catch(\Exception $e)
+  //  {
+  //    return ($e->getMessage());
+  //  }
+    return view('welcome');
+
 });
