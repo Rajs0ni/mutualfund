@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\SP\Models\Portfolio;
+use App\SP\Models\AnalyzedRecord;
 
 class analyzeXl extends Command
 {
@@ -39,45 +40,19 @@ class analyzeXl extends Command
      */
     public function handle()
     {
-
-
         try 
-        {
-            // $monthYear = 'Jan,2018';
-
+        {       
             $monthYears =  Portfolio::GetMonthYear();
-            dd($monthYears);
-            $data = Portfolio::AnalyzedRecords($monthYear);
-        //     $monthWiseRecords = \App\SP\Models\Portfolio::all()->groupBy('month_year');
-        //     $stocks = \App\SP\Models\Stock::all();
-
-        //     foreach ($stocks as $key => $stock) { 
-                
-        //         foreach ($monthWiseRecords as $monthYear => $records) 
-        //         {
-        //             // $this->processEachStock($stock,$records,$monthYear)
-        //             $count = 0;
-        //             $quantity = 0;
-        //             foreach ($records as $key => $record) 
-        //             {
-        //                 if($stock->id == $record->stock_id)
-        //                 {
-        //                     $count++;
-        //                     $quantity += $record->quantity;
-        //                 }
-        //             }
-
-                   
-        //             \App\SP\Models\AnalyzedRecord::create([
-        //                 'stock_id' => $stock->id,
-        //                 'month_year' => $monthYear,
-        //                 'count' => $count,
-        //                 'quantity' => $quantity,
-        //                 'mfh' => NULL
-        //             ]);
-        //         }
-        //    }
-
+    
+            if($monthYears->count())
+            {
+                $this->output->title('Analyzing Records....');
+                foreach ($monthYears as $key => $value) {
+                    $records = Portfolio::AnalyzedRecords($value->month_year);
+                    $this->storeEachRecord($value->month_year,$records);
+                }
+                $this->output->success("You're Done");
+            }
         }
         catch (\Exception $e) {
            $this->info($e->getMessage());
@@ -85,39 +60,34 @@ class analyzeXl extends Command
         
     }
 
+    public function storeEachRecord($monthYear,$records)
+    {
+        try {
+       
+            foreach ($records as $key => $record) {
 
-    public function processEachStock ($stock,$records,$monthYear){
+                $analyzedRecord = AnalyzedRecord::firstOrNew(
+                    ['stock_id' => $record->stock_id , 'month_year' => $monthYear]
+                );
 
-        $count = 0;
-        $quantity = 0;
-        $mfHouse = [];
-        foreach ($records as $key => $record) 
-        {
-            if($stock->id == $record->stock_id)
-            {
-                $count++;
-                $quantity += $record->quantity;
-                $mfHouse[] = $record->mf_house;
+                $analyzedRecord->stock_id = $record->stock_id;
+                $analyzedRecord->month_year = $monthYear;
+                $analyzedRecord->mf_count = $record->mf_count;
+                $analyzedRecord->mfh_count = $record->mfh_count;
+                $analyzedRecord->quantity = $record->q_sum;
+                $analyzedRecord->save();
+                // \App\SP\Models\AnalyzedRecord::create([
+                //     'stock_id' => $record->stock_id,
+                //     'month_year' => $monthYear,
+                //     'mf_count' => $record->mf_count,
+                //     'mfh_count' => $record->mfh_count,
+                //     'quantity' => $record->q_sum
+                // ]);
             }
         }
-        $mfHouseCount = count(array_unique($mfHouse));
-         // $this->save($stock,$count,$quantity,$monthYear)
-    }
-
-    public function save($stock,$count,$quantity,$monthYear,$mfHouseCount) {
-        
-        try 
-        {
-            \App\SP\Models\AnalyzedRecord::create([
-                'stock_id' => $stock->id,
-                'month_year' => $monthYear,
-                'count' => $count,
-                'quantity' => $quantity,
-                'mfh' => $mfHouseCount
-            ]);
-        }
         catch (\Exception $e) {
-            echo($e->getMessage());
-        }
+            $this->info($e->getMessage());
+         }
     }
+    
 }

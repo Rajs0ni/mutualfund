@@ -17,9 +17,9 @@ class CreateAnalyzedRecordsTable extends Migration
             $table->integer('stock_id');
             $table->string('month_year');
             $table->primary(['stock_id', 'month_year']); //composite primary key
-            $table->integer('count')->default(0);
+            $table->integer('mf_count')->default(0);
+            $table->integer('mfh_count')->nullable()->default(0);
             $table->integer('quantity')->default(0);
-            $table->integer('mfh')->nullable()->default(0);
         });
     }
 

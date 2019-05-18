@@ -48,6 +48,8 @@ class Import {
             $indexSheet = $instance->processIndexSheet($sheets,$excelImport->getSheetNames());
             $instance->setIndexSheet($indexSheet);
 
+            $instance->truncateExistingRecordsFor($this->month_year,$this->family);
+          
             foreach ($sheets as $sheetSortname => $sheet) {
                 if(!in_array($sheetSortname, $instance->getIndexFileName()))
                     $instance->processEachSheet($sheet, $sheetSortname, $this->family, $this->month_year);    

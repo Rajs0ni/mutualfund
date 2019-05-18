@@ -26,6 +26,18 @@ class Base {
         $this->indexSheet = $indexSheet;
     }
     
+    public function truncateExistingRecordsFor($month_year,$family)
+    {
+        try 
+        {
+            if(Portfolio::CheckRecordsExistFor($month_year,$family))
+                Portfolio::DeleteAll($month_year,$family);
+        }
+        catch(\Exception $e){
+            echo($e->getMessage());
+        }
+    }
+
     public function processEachSheet($sheet, $sheetSortname, $family, $month_year) {
 
         $this->family = $family;
@@ -151,7 +163,7 @@ class Base {
     public function saveFund() {
         try 
         {
-            $mutualFund = MutualFund::where('nickname', $this->sheetSortname)->first();
+            $mutualFund = MutualFund::where('nickname', trim($this->sheetSortname))->first();
             if(!$mutualFund)
             {
                 $mutualFund = MutualFund::create([
@@ -172,7 +184,7 @@ class Base {
     public function save($record){
         try
         {
-            $stock = Stock::where('isin', $record[$this->ISIN])->first();
+            $stock = Stock::where('isin', trim($record[$this->ISIN]))->first();
             if(!$stock)
             {
                 $stock = Stock::create([
